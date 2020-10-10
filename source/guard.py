@@ -1,26 +1,28 @@
 import pandas as pd
 import numpy  as np
-def factory():
+
+class factorys:
+    pass
+def factory(levs):
     #获得工厂参数基础数据
     df=pd.read_excel('../其他文件/basedata.xlsx',skiprows=1,na_values=0,nrows=20,index_col='lev',na_filter=False)
     df['cost']=df['cost'].astype(np.float64)
     df['get']=df['get'].astype(np.float64)
-    levs=[10,10,10,12]
     df=df.loc[levs,:]
     base_hour_p=df['hourP'].sum() #每小时4个工厂提供的基础加工量
     per_slot_storage=df['storage'].sum() #4个加工厂提供的材料投放量
     return base_hour_p,per_slot_storage
 
 def countFactory():
-    df=pd.read_excel('../其他文件/basedata.xlsx',skiprows=26,index_col='index',nrows=5,usecols=['index','datas'])
+    df=pd.read_excel('../其他文件/basedata.xlsx',skiprows=49,index_col='index',nrows=9,usecols=['index','datas'])
     df=df.dropna()
     fac_rate=df.loc[['fac_rate'],'datas'][0]
     fac_store=df.loc[['fac_store'],'datas'][0]
     buy_rate=df.loc[['buy_rate'],'datas'][0]
     buy_store=df.loc[['buy_store'],'datas'][0]
     slots=df.loc[['slots'],'datas'][0]
-
-    base_hour_p=factory()[0]
+    levs = list(df.loc[['factories'],'datas'][0])
+    base_hour_p=factory(levs)[0]
     per_slot_storage=factory()[1]
     # produce = base_hour_p*(1+fac_rate)*1.405 #经验观察值，而非面板写的50%提升，也不是18%+50%,所以这里没有使用buy_rate
     produce = base_hour_p*(1+fac_rate+buy_rate)/1.013333333 #经验观察值，而非面板写的50%提升，也不是18%+50%,所以这里没有使用buy_rate
@@ -30,7 +32,7 @@ def countFactory():
     mins = round((storage/produce-hours)*60,2)
     return produce, storage, hours,mins,slots
 def get_needs(nowlevs:dict,need:int):
-    df=pd.read_excel('../其他文件/basedata.xlsx',skiprows=36,nrows=19,usecols=['ac1','ac1cost',
+    df=pd.read_excel('../其他文件/basedata.xlsx',skiprows=25,nrows=19,usecols=['ac1','ac1cost',
                                                                            'ac2','ac2cost',
                                                                            'ac3','ac3cost',
                                                                            'ac4','ac4cost'])
@@ -53,9 +55,9 @@ def get_needs(nowlevs:dict,need:int):
 #0:数量
 #1:df代表明细
 def get_poison_result():
-    nowlevs={'ac1':20,'ac2':17,'ac3':13,'ac4':11}
-    talent_prov=12 #假设蓝色专精3+11+11=25点，提供600专精
-    target=80 #目标毒抗等级8000
+    nowlevs={'ac1':20,'ac2':18,'ac3':14,'ac4':12}
+    talent_prov=6 #假设蓝色专精3+11+11=25点，提供600专精
+    target=75 #目标毒抗等级8000
     need=poison(nowlevs,talent_prov,target)  #结合病毒所等级，专精，目标专精，计算还需要的病毒所等级
     df=get_needs(nowlevs,need)
     df=df.loc[0:need-1]
