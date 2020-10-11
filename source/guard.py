@@ -1,8 +1,7 @@
 import pandas as pd
 import numpy  as np
 
-class factorys:
-    pass
+
 def factory(levs):
     #获得工厂参数基础数据
     df=pd.read_excel('../其他文件/basedata.xlsx',skiprows=1,na_values=0,nrows=20,index_col='lev',na_filter=False)
